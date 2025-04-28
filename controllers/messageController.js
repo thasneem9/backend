@@ -2,11 +2,22 @@ import Conversation from "../models/conversationModel.js";
 import Message from "../models/messageModel.js";
 import { getRecipientSocketId, io } from "../socket/socket.js";
 import { v2 as cloudinary } from "cloudinary";
+import jwt from "jsonwebtoken";
+import User from "../models/userModel.js";
 
 async function sendMessage(req, res) {
 	try {
 		const { recipientId, message } = req.body;
 		let { img } = req.body;
+
+		const token = req.cookies.jwt;
+		if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+		console.log("JWT_SECRET:", process.env.JWT_SECRET);
+		console.log("Received Token:", token);
+		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+		const tuser = await User.findById(decoded.userId).select("-password");
+		req.user = tuser;
+		
 		const senderId = req.user._id;
 
 		let conversation = await Conversation.findOne({
@@ -59,6 +70,14 @@ async function sendMessage(req, res) {
 
 async function getMessages(req, res) {
 	const { otherUserId } = req.params;
+	const token = req.cookies.jwt;
+		if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+		console.log("JWT_SECRET:", process.env.JWT_SECRET);
+		console.log("Received Token:", token);
+		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+		const tuser = await User.findById(decoded.userId).select("-password");
+		req.user = tuser;
+		
 	const userId = req.user._id;
 	try {
 		const conversation = await Conversation.findOne({
@@ -80,6 +99,13 @@ async function getMessages(req, res) {
 }
 
 async function getConversations(req, res) {
+	const token = req.cookies.jwt;
+		if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+		console.log("JWT_SECRET:", process.env.JWT_SECRET);
+		console.log("Received Token:", token);
+		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+		const tuser = await User.findById(decoded.userId).select("-password");
+		req.user = tuser;
 	const userId = req.user._id;
 	try {
 		const conversations = await Conversation.find({ participants: userId }).populate({
