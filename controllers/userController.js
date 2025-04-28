@@ -217,9 +217,13 @@ const getSuggestedUsers = async (req, res) => {
 
 		suggestedUsers.forEach((user) => (user.password = null));
 
-		res.status(200).json(suggestedUsers);
+		/* res.status(200).json(suggestedUsers); */
+		res.status(200).json({
+			_id: userId,
+			suggestedUsers
+		});
 	} catch (error) {
-		res.status(500).json({ error: error.message });
+		res.status(500).json({ error: error.message,_id:req.user._id });
 	}
 };
 
