@@ -1,7 +1,7 @@
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
 import { v2 as cloudinary } from "cloudinary";
-
+import jwt from "jsonwebtoken";
 const createPost = async (req, res) => {
 	try {
 		const { postedBy, text } = req.body;
@@ -136,6 +136,17 @@ const replyToPost = async (req, res) => {
 
 const getFeedPosts = async (req, res) => {
 	try {
+		const token = req.cookies.jwt;
+				
+						if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+						console.log("JWT_SECRET:", process.env.JWT_SECRET);
+						console.log("Received Token:", token);
+						const decoded = jwt.verify(token, process.env.JWT_SECRET);
+					
+		
+						const tuser = await User.findById(decoded.userId).select("-password");
+				
+						req.user = tuser;
 		const userId = req.user._id;
 		const user = await User.findById(userId);
 		if (!user) {
@@ -148,6 +159,7 @@ const getFeedPosts = async (req, res) => {
 
 		res.status(200).json(feedPosts);
 	} catch (err) {
+		console.error(err);
 		res.status(500).json({ error: err.message });
 	}
 };

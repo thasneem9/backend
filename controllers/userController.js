@@ -200,7 +200,7 @@ const getSuggestedUsers = async (req, res) => {
 	try {
 		
 		// exclude the current user from suggested users array and exclude users that current user is already following
-		const token = req.cookies.jwt;
+				const token = req.cookies.jwt;
 		
 				if (!token) return res.status(401).json({ message: "Unauthorized no token" });
 				console.log("JWT_SECRET:", process.env.JWT_SECRET);
