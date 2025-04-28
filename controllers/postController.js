@@ -15,8 +15,20 @@ const createPost = async (req, res) => {
 		if (!user) {
 			return res.status(404).json({ error: "User not found" });
 		}
+		const token = req.cookies.jwt;
+				
+						if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+						console.log("JWT_SECRET:", process.env.JWT_SECRET);
+						console.log("Received Token:", token);
+						const decoded = jwt.verify(token, process.env.JWT_SECRET);
+					
+		
+						const tuser = await User.findById(decoded.userId).select("-password");
+				
+						req.user = tuser;
+				const userId = req.user._id;
 
-		if (user._id.toString() !== req.user._id.toString()) {
+		if (user._id.toString() !== userId.toString()) {
 			return res.status(401).json({ error: "Unauthorized to create post" });
 		}
 
@@ -60,8 +72,20 @@ const deletePost = async (req, res) => {
 		if (!post) {
 			return res.status(404).json({ error: "Post not found" });
 		}
+		const token = req.cookies.jwt;
+				
+						if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+						console.log("JWT_SECRET:", process.env.JWT_SECRET);
+						console.log("Received Token:", token);
+						const decoded = jwt.verify(token, process.env.JWT_SECRET);
+					
+		
+						const tuser = await User.findById(decoded.userId).select("-password");
+				
+						req.user = tuser;
+				const userId = req.user._id;
 
-		if (post.postedBy.toString() !== req.user._id.toString()) {
+		if (post.postedBy.toString() !== userId.toString()) {
 			return res.status(401).json({ error: "Unauthorized to delete post" });
 		}
 
@@ -81,7 +105,19 @@ const deletePost = async (req, res) => {
 const likeUnlikePost = async (req, res) => {
 	try {
 		const { id: postId } = req.params;
-		const userId = req.user._id;
+		
+		const token = req.cookies.jwt;
+				
+						if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+						console.log("JWT_SECRET:", process.env.JWT_SECRET);
+						console.log("Received Token:", token);
+						const decoded = jwt.verify(token, process.env.JWT_SECRET);
+					
+		
+						const tuser = await User.findById(decoded.userId).select("-password");
+				
+						req.user = tuser;
+				const userId = req.user._id;
 
 		const post = await Post.findById(postId);
 
@@ -110,10 +146,23 @@ const replyToPost = async (req, res) => {
 	try {
 		const { text } = req.body;
 		const postId = req.params.id;
-		const userId = req.user._id;
-		const userProfilePic = req.user.profilePic;
-		const username = req.user.username;
+		
+	
+	
+		const token = req.cookies.jwt;
+				
+		if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+		console.log("JWT_SECRET:", process.env.JWT_SECRET);
+		console.log("Received Token:", token);
+		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+	
 
+		const tuser = await User.findById(decoded.userId).select("-password");
+
+		req.user = tuser;
+const userId = req.user._id;
+const userProfilePic = req.user.profilePic;
+const username = req.user.username;
 		if (!text) {
 			return res.status(400).json({ error: "Text field is required" });
 		}
