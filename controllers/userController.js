@@ -113,7 +113,19 @@ const followUnFollowUser = async (req, res) => {
 	try {
 		const { id } = req.params;
 		const userToModify = await User.findById(id);
-		const currentUser = await User.findById(req.user._id);
+		const token = req.cookies.jwt;
+		
+		if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+		console.log("JWT_SECRET:", process.env.JWT_SECRET);
+		console.log("Received Token:", token);
+		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+	
+
+		const user = await User.findById(decoded.userId).select("-password");
+
+		req.user = user;
+const userId = req.user._id;
+		const currentUser = await User.findById(userId);
 
 		if (id === req.user._id.toString())
 			return res.status(400).json({ error: "You cannot follow/unfollow yourself" });
@@ -142,6 +154,17 @@ const followUnFollowUser = async (req, res) => {
 const updateUser = async (req, res) => {
 	const { name, email, username, password, bio } = req.body;
 	let { profilePic } = req.body;
+	const token = req.cookies.jwt;
+		
+				if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+				console.log("JWT_SECRET:", process.env.JWT_SECRET);
+				console.log("Received Token:", token);
+				const decoded = jwt.verify(token, process.env.JWT_SECRET);
+			
+
+				const tuser = await User.findById(decoded.userId).select("-password");
+		
+				req.user = tuser;
 
 	const userId = req.user._id;
 	try {
@@ -241,7 +264,19 @@ const getSuggestedUsers = async (req, res) => {
 
 const freezeAccount = async (req, res) => {
 	try {
-		const user = await User.findById(req.user._id);
+		const token = req.cookies.jwt;
+		
+		if (!token) return res.status(401).json({ message: "Unauthorized no token" });
+		console.log("JWT_SECRET:", process.env.JWT_SECRET);
+		console.log("Received Token:", token);
+		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+	
+
+		const tuser = await User.findById(decoded.userId).select("-password");
+
+		req.user = tuser;
+const userId = req.user._id;
+		const user = await User.findById(userId);
 		if (!user) {
 			return res.status(400).json({ error: "User not found" });
 		}
